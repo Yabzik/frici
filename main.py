@@ -1,5 +1,10 @@
-import logging, telebot
-import utils, msg, db
+import logging
+import telebot
+import utils
+import msg
+import db
+
+from user import User
 
 # ---INIT---
 logger = telebot.logger
@@ -34,22 +39,24 @@ def send_welcome(message):
 			db.add_user(message.chat.id)
 	bot.reply_to(message, msg.hello, reply_markup=utils.genMarkup('main'))
 
+
+
 @bot.message_handler(func=utils.checkCommon)
 @utils.safe
 def handle_common(message):
 	if message.text == msg.personal:
 		bot.reply_to(message, 'personal')
 	elif message.text == msg.buy:
+		db.add_balance(message.chat.id, 25)
 		pass
 	elif message.text == msg.sell:
 		pass
 	elif message.text == msg.info:
-		bot.send_message(message.chat.id, msg.info_text)
+		bot.send_message(message.chat.id, '{} \n {}'.format(msg.info_text, db.get_user_balance(message.chat.id)))
 	elif message.text == msg.support:
 		pass
 
 # ---HANDLERS---
-
 
 
 @utils.safe

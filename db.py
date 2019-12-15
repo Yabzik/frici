@@ -9,12 +9,13 @@ from conf import db_conf
 def add_user(user_id, ref_id=None):
 	with closing(pymysql.connect(**db_conf)) as conn:
 		with conn.cursor() as cursor:
-			sql = 'INSERT INTO users (user_id, balance, invited_by, ref_code) VALUES (%s, %s, %s, %s)'
+			sql = 'INSERT INTO users (user_id, balance, invited_by, ref_code, state) VALUES (%s, %s, %s, %s, %s)'
 			ref_code = genRef()
 			bal = 0
+			state = 'main'
 			if ref_id:
 				bal += 25
-			cursor.execute(sql, (user_id, bal, ref_id, ref_code))
+			cursor.execute(sql, (user_id, bal, ref_id, ref_code, state))
 			conn.commit()
 
 def get_user(user_id):
