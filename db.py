@@ -41,3 +41,10 @@ def add_balance(user_id, amount):
 			sql = 'UPDATE users SET balance = balance + %s WHERE user_id = %s'
 			cursor.execute(sql, (amount, user_id))
 			conn.commit()
+
+def change_state(user_id, state):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'UPDATE users SET state = %s WHERE user_id = %s'
+			cursor.execute(sql, (state, user_id))
+			conn.commit()

@@ -6,6 +6,9 @@ import db
 
 from user import User
 
+import menu
+from menu import Page
+
 # ---INIT---
 logger = telebot.logger
 logger.setLevel(logging.INFO)
@@ -37,24 +40,33 @@ def send_welcome(message):
 				db.add_user(message.chat.id)
 		else:
 			db.add_user(message.chat.id)
-	bot.reply_to(message, msg.hello, reply_markup=utils.genMarkup('main'))
+	bot.reply_to(message, msg.hello, reply_markup = 
+			  Page(db.get_user(message.chat.id)['state']).getMarkup())
 
 
 
-@bot.message_handler(func=utils.checkCommon)
+@bot.message_handler()
 @utils.safe
+#def handle_common(message):
+#	if message.text == msg.personal:
+#		bot.reply_to(message, 'personal')
+#	elif message.text == msg.buy:
+#		db.add_balance(message.chat.id, 25)
+#		pass
+#	elif message.text == msg.sell:
+#		pass
+#	elif message.text == msg.info:
+#		bot.send_message(message.chat.id, '{} \n {}'.format(msg.info_text, db.get_user_balance(message.chat.id)))
+#	elif message.text == msg.support:
+#		pass
 def handle_common(message):
-	if message.text == msg.personal:
-		bot.reply_to(message, 'personal')
-	elif message.text == msg.buy:
-		db.add_balance(message.chat.id, 25)
-		pass
-	elif message.text == msg.sell:
-		pass
-	elif message.text == msg.info:
-		bot.send_message(message.chat.id, '{} \n {}'.format(msg.info_text, db.get_user_balance(message.chat.id)))
-	elif message.text == msg.support:
-		pass
+	#создавать страницы меню в menu.py
+	curPage = Page(db.get_user(message.chat.id)['state'])
+
+	
+
+	if curPage.isValidMessage(message):
+		curPage.pressButton(message)
 
 # ---HANDLERS---
 
