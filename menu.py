@@ -48,7 +48,9 @@ class MainPage():
 					'{} \n {}'.format(msg.info_text,
 					  db.get_user(message.chat.id)['balance']))
 		elif button == self.supportButton:
-			pass
+			db.change_state(message.chat.id, 'support')
+			bot.reply_to(message, "Все Ваши сообщения, отправленные после этого будут переданы администрации\nДля завершения нажмите на кнопку 'Завершить'", reply_markup = 
+			  Page(db.get_user(message.chat.id)['state']).getMarkup())
 
 class ShopPage():
 	def __init__(self):
@@ -84,14 +86,38 @@ class ShopPage():
 			  Page(db.get_user(message.chat.id)['state']).getMarkup())
 			pass	
 
+class SupportPage():
+	def __init__(self):
+		#инициализация кнопки ебнутой
+		self.completeButton = 'Завершить'
+
+		#лист текста кнопок(для проверки в хендлере)
+		self.msgList = [self.completeButton]
+
+		#создание хуйни этой для отображения кнопок
+		self.markup = types.ReplyKeyboardMarkup(row_width=1)
+
+		#закидываем кнопки в хуйню для отображения(согласен, выглядит неочень)
+		self.markup.row(types.KeyboardButton(self.completeButton))
+	
+	#что же будет делать кнопка при нажатии?????????
+	def onPressButton(self, button, message):
+		if button == self.completeButton:
+			db.change_state(message.chat.id, 'main') #переход на другую станицу
+			bot.reply_to(message, "Спасибо! После рассмотрения обращения мы ответим Вам", reply_markup = 
+			  Page(db.get_user(message.chat.id)['state']).getMarkup())
+
 class Page():
 
 	#инициализация страницы в зависимости от входящего стринга из ДБ
 	def __init__(self, pageName):
+		self.page_name = pageName
 		if pageName == 'main':
 			self.page = MainPage()
 		elif pageName == 'shop':
 			self.page = ShopPage()
+		elif pageName == 'support':
+			self.page = SupportPage()
 
 	def getMarkup(self):
 		return self.page.markup
