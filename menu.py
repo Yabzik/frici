@@ -67,6 +67,7 @@ class ShopPage():
 		self.markup.row(types.KeyboardButton(self.beerButton),
 				 types.KeyboardButton(self.vodkaButton))
 		self.markup.row(types.KeyboardButton(self.backButton))
+		self.markup.row(types.KeyboardButton('suchka'))
 	
 	#что же будет делать кнопка при нажатии?????????
 	def onPressButton(self, button, message):
@@ -80,7 +81,7 @@ class ShopPage():
 			db.change_state(message.chat.id, 'main')
 			
 			#обновление страницы
-			bot.reply_to(message, "Вы ушли в шоп", reply_markup = 
+			bot.reply_to(message, "Вы ушли в мейн", reply_markup = 
 			  Page(db.get_user(message.chat.id)['state']).getMarkup())
 			pass	
 

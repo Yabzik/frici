@@ -63,8 +63,6 @@ def handle_common(message):
 	#создавать страницы меню в menu.py
 	curPage = Page(db.get_user(message.chat.id)['state'])
 
-	
-
 	if curPage.isValidMessage(message):
 		curPage.pressButton(message)
 
