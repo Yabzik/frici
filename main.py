@@ -65,6 +65,9 @@ def handle_common(message):
 
 	if curPage.isValidMessage(message):
 		curPage.pressButton(message)
+	elif curPage.page_name == 'support': # отлавливаем сообщения в поддержку
+		bot.reply_to(message, 'Тут должна быть обработка') #todo
+
 
 # ---HANDLERS---
 
