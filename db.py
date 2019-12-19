@@ -48,3 +48,17 @@ def change_state(user_id, state):
 			sql = 'UPDATE users SET state = %s WHERE user_id = %s'
 			cursor.execute(sql, (state, user_id))
 			conn.commit()
+
+def open_support(user_id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'UPDATE users SET support_state = "open" WHERE user_id = %s'
+			res = cursor.execute(sql, (user_id))
+			conn.commit()
+
+def send_to_support(user_id, message):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'INSERT INTO messages (sender, recipient, message) VALUES (%s, %s, %s)'
+			res = cursor.execute(sql, (user_id, 0, message))
+			conn.commit()
