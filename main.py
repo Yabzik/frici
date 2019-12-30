@@ -4,6 +4,8 @@ import utils
 import msg
 import db
 
+from saleApplication import SaleApp
+
 from user import User
 
 import menu
@@ -41,7 +43,7 @@ def send_welcome(message):
 		else:
 			db.add_user(message.chat.id)
 	bot.reply_to(message, msg.hello, reply_markup = 
-			  Page(db.get_user(message.chat.id)['state']).getMarkup())
+			  Page(User(message)).getMarkup())
 
 
 
@@ -60,14 +62,20 @@ def send_welcome(message):
 #	elif message.text == msg.support:
 #		pass
 def handle_common(message):
-	#создавать страницы меню в menu.py
-	curPage = Page(db.get_user(message.chat.id)['state'])
+	#создание страницы меню в menu.py
+	user = User(message)
+	curPage = Page(user)
 
-	if curPage.isValidMessage(message):
-		curPage.pressButton(message)
-	elif curPage.page_name == 'support': # отлавливаем сообщения в поддержку
-		db.open_support(message.chat.id)
-		db.send_to_support(message.chat.id, message.text)
+	#обработка запроса(теперь вся обработка внутри класса Page)
+	curPage.handleMessage()
+
+	#if curPage.isValidMessage(message):
+	#	curPage.pressButton(message)
+	#elif curPage.page_name == 'support': # отлавливаем сообщения в поддержку
+	#	db.open_support(message.chat.id)
+	#	db.send_to_support(message.chat.id, message.text)
+	#elif curPage.page_name == 'sale':
+	#	pass
 
 
 

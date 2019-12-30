@@ -62,3 +62,55 @@ def send_to_support(user_id, message):
 			sql = 'INSERT INTO messages (sender, recipient, message) VALUES (%s, %s, %s)'
 			res = cursor.execute(sql, (user_id, 0, message))
 			conn.commit()
+
+def get_sale_app(user_id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'SELECT * FROM goods WHERE seller = %s AND status = %s'
+			cursor.execute(sql, (user_id, 'writing'))
+			try:
+				return cursor.fetchone()
+			except TypeError:
+				return None
+
+def add_sale_app(user_id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'INSERT INTO goods (title, description, seller, status) VALUES (%s, %s, %s, %s)'
+			cursor.execute(sql, ('None', 'None', user_id, 'writing'))
+			conn.commit()
+
+def add_sale_app_title(id, title):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'UPDATE goods SET title = %s WHERE id = %s'
+			cursor.execute(sql, (title, id))
+			conn.commit()
+
+def add_sale_app_desc(id, desc):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'UPDATE goods SET description = %s WHERE id = %s'
+			cursor.execute(sql, (desc, id))
+			conn.commit()
+
+def add_sale_app_price(id, price):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'UPDATE goods SET price = %s WHERE id = %s'
+			cursor.execute(sql, (price, id))
+			conn.commit()
+
+def set_sale_app_status(id, status):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'UPDATE goods SET status = %s WHERE id = %s'
+			cursor.execute(sql, (status, id))
+			conn.commit()
+
+def del_sale_app(id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'DELETE FROM goods WHERE id = %s;'
+			cursor.execute(sql, id)
+			conn.commit()
