@@ -17,6 +17,7 @@ class SaleApp():
 		self.seller = saleApp['seller']
 		self.status = saleApp['status']
 
+		self.photos = db.get_sale_app_photos(self.id)
 	
 	def setTitle(self, title):
 		db.add_sale_app_title(self.id, title)
@@ -33,6 +34,10 @@ class SaleApp():
 	def setStatus(self, status):
 		db.set_sale_app_status(self.id, status)
 		self.status = status
+
+	def addPhoto(self, photo):
+		db.add_sale_app_photo(self.id, photo)
+		#self.photos.append(photo)
 
 	def delete(self):
 		db.del_sale_app(self.id)

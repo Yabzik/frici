@@ -73,6 +73,16 @@ def get_sale_app(user_id):
 			except TypeError:
 				return None
 
+def get_sale_app_photos(sale_id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'SELECT photo FROM photos WHERE sale_id = %s'
+			cursor.execute(sql, (sale_id))
+			try:
+				return cursor.fetchall()
+			except TypeError:
+				return None
+
 def add_sale_app(user_id):
 	with closing(pymysql.connect(**db_conf)) as conn:
 		with conn.cursor() as cursor:
@@ -106,6 +116,13 @@ def set_sale_app_status(id, status):
 		with conn.cursor() as cursor:
 			sql = 'UPDATE goods SET status = %s WHERE id = %s'
 			cursor.execute(sql, (status, id))
+			conn.commit()
+
+def add_sale_app_photo(id, photo):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'INSERT INTO photos (sale_id, photo) VALUES (%s, %s)'
+			cursor.execute(sql, (id, photo))
 			conn.commit()
 
 def del_sale_app(id):

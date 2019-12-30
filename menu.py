@@ -59,7 +59,7 @@ class MainPage():
 
 			#обновление страницы
 			bot.reply_to(self.user.message, "Вы зашли в создание товара на продажу, если Вы передумали что-либо продавать или ввели неккоректные данные, нажмите кнопку Отмена. После создания заявки на продажу, модераторы проверят её и Ваш товар станет доступен для покупки другим пользователям. Статус обработки заявки можно посмотреть где-то.", reply_markup = 
-			  Page(self.user).getMarkup())
+			  Page(self.user).getMarkup()).wait()
 
 			bot.send_message(self.user.id, "Напишите название вашего товара")
 			pass
@@ -201,10 +201,13 @@ class SalePage():
 			bot.send_message(self.user.id, "Напишите описание к вашему товару")
 		elif self.saleApp.description == 'None':
 			self.saleApp.setDesc(self.user.message.text)
+			bot.send_message(self.user.id, "Отправьте фотографии товара (все одним сообщением)")
+		elif not self.saleApp.photos or self.user.message.content_type == 'photo':
+			fileID = self.user.message.photo[-1].file_id
+			file = bot.get_file(fileID).wait()
+			pic = bot.download_file(file.file_path).wait()
+			self.saleApp.addPhoto(pic)
 			bot.send_message(self.user.id, "Напишите цену вашего товара")
-
-		#тут elif для пикчи. В файле saleApplication в __init__ надо создать состояние обработки 
-
 		elif not self.saleApp.price:
 			self.saleApp.setPrice(self.user.message.text)
 			
@@ -244,7 +247,10 @@ class Page():
 		return self.page.markup
 
 	def handleMessage(self):
-		if self.__isButton(self.user.message):
+		if self.user.message.content_type == 'photo':
+			if self.page_name == 'sale':
+				self.page.Think()
+		elif self.__isButton(self.user.message):
 		    self.page.onPressButton()
 			#новая проверка,  может ли страница обрабатывать что-то кроме кнопки
 		elif self.page.isExtended:

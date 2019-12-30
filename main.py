@@ -47,7 +47,7 @@ def send_welcome(message):
 
 
 
-@bot.message_handler()
+@bot.message_handler(content_types=['text', 'photo'])
 @utils.safe
 #def handle_common(message):
 #	if message.text == msg.personal:
