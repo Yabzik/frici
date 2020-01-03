@@ -49,18 +49,6 @@ def send_welcome(message):
 
 @bot.message_handler(content_types=['text', 'photo'])
 @utils.safe
-#def handle_common(message):
-#	if message.text == msg.personal:
-#		bot.reply_to(message, 'personal')
-#	elif message.text == msg.buy:
-#		db.add_balance(message.chat.id, 25)
-#		pass
-#	elif message.text == msg.sell:
-#		pass
-#	elif message.text == msg.info:
-#		bot.send_message(message.chat.id, '{} \n {}'.format(msg.info_text, db.get_user_balance(message.chat.id)))
-#	elif message.text == msg.support:
-#		pass
 def handle_common(message):
 	#создание страницы меню в menu.py
 	user = User(message)
@@ -69,28 +57,11 @@ def handle_common(message):
 	#обработка запроса(теперь вся обработка внутри класса Page)
 	curPage.handleMessage()
 
-	#if curPage.isValidMessage(message):
-	#	curPage.pressButton(message)
-	#elif curPage.page_name == 'support': # отлавливаем сообщения в поддержку
-	#	db.open_support(message.chat.id)
-	#	db.send_to_support(message.chat.id, message.text)
-	#elif curPage.page_name == 'sale':
-	#	pass
-
-
 
 # ---HANDLERS---
 
 
 @utils.safe
 def main():
-	#db.add_user(152221)
-	#db.get_user(152221)
 	bot.polling()
 main()
-
-""" TODO:
-report exceptions to tg
-
-
-"""
