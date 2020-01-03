@@ -78,6 +78,10 @@ class MainPage():
 			bot.reply_to(self.user.message, "Все Ваши сообщения, отправленные после этого будут переданы администрации\nДля завершения нажмите на кнопку 'Завершить'", reply_markup = 
 			  Page(self.user).getMarkup())
 
+	def handleButtonCallback(self, call):
+		if call.data == 'invite_message':
+			bot.answer_callback_query(callback_query_id=call.id, text='да пошел ты нахуй👍')
+
 class ShopPage():
 	def __init__(self, user):
 		#колхозная проверка на наличии альтернативной обработки
@@ -261,6 +265,9 @@ class Page():
 			#новая проверка,  может ли страница обрабатывать что-то кроме кнопки
 		elif self.page.isExtended:
 			self.page.Think()
+
+	def handleButtonCallback(self, call):
+		self.page.handleButtonCallback(call)
 
 			#проверка на наличие кнопки
 	def __isButton(self, message):

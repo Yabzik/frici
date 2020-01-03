@@ -57,6 +57,16 @@ def handle_common(message):
 	#обработка запроса(теперь вся обработка внутри класса Page)
 	curPage.handleMessage()
 
+@bot.callback_query_handler(func=lambda call: True)
+@utils.safe
+def query_handler(call):
+	# отлов вызовов с кнопок
+    user = User(call.message)
+    curPage = Page(user)
+
+    curPage.handleButtonCallback(call)
+	#if call.data == 'add':
+	#	bot.answer_callback_query(callback_query_id=call.id, text='Hello world')
 
 # ---HANDLERS---
 
