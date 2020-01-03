@@ -44,7 +44,13 @@ class MainPage():
 		button = self.user.message.text
 
 		if button == self.profileButton:
-			bot.reply_to(self.user.message, 'personal')
+			markup = telebot.types.InlineKeyboardMarkup()
+			button = telebot.types.InlineKeyboardButton(text='Пригласить друга', callback_data='invite_message')
+			markup.add(button)
+			bot.send_message(self.user.message.chat.id, '💎 Баланс: {}\n'
+														'🛒 Покупок: {}\n'
+														'💰 Продаж: {}'.format(self.user.balance, db.get_purchases(self.user.id), db.get_sells(self.user.id)),
+														reply_markup=markup)
 		elif button == self.buyButton:
 			#тут переход на другую страницу
 			self.user.setState('shop')

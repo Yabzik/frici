@@ -25,6 +25,20 @@ def get_user(user_id):
 			cursor.execute(sql, user_id)
 			return cursor.fetchone()
 
+def get_purchases(user_id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'SELECT * FROM goods WHERE buyer = %s AND status = "sold"'
+			cursor.execute(sql, user_id)
+			return cursor.rowcount
+
+def get_sells(user_id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'SELECT * FROM goods WHERE seller = %s AND status = "sold"'
+			cursor.execute(sql, user_id)
+			return cursor.rowcount
+
 def get_id_by_ref(ref):
 	with closing(pymysql.connect(**db_conf)) as conn:
 		with conn.cursor() as cursor:
