@@ -29,13 +29,14 @@ bot = telebot.AsyncTeleBot("605894746:AAHprnzygPIMD0yBCeecyC0kYehYKBWoOQ0")
 
 
 # ---HANDLERS---
-@utils.safe
 @bot.message_handler(commands=['start', 'help'])
+@utils.safe
 def send_welcome(message):
 	if not db.get_user(message.chat.id): # if new user
 		if len(message.text.split()) > 1: # if referal in /start
 			refid = db.get_id_by_ref(message.text.split()[1])
 			if refid: # if refid is not none
+				bot.send_message(refid, '🏅 Кто-то запустил бота по вашей ссылке! Вы получили +25 к балансу')
 				db.add_user(message.chat.id, ref_id=refid)
 				db.add_balance(refid, 25)
 			else:

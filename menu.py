@@ -80,7 +80,15 @@ class MainPage():
 
 	def handleButtonCallback(self, call):
 		if call.data == 'invite_message':
-			bot.answer_callback_query(callback_query_id=call.id, text='да пошел ты нахуй👍')
+			bot.answer_callback_query(callback_query_id=call.id)
+			markup = telebot.types.InlineKeyboardMarkup()
+			markup.add(telebot.types.InlineKeyboardButton(text='Получить ссылку для приглашения', callback_data='invite_get_link'))
+			bot.send_message(self.user.message.chat.id, 'Вы можете пригласить друга запустить бота. При этом и Вы и приглашенный друг получите +25 к балансу.',
+														reply_markup=markup)
+		elif call.data == 'invite_get_link':
+			bot.answer_callback_query(callback_query_id=call.id)
+			bot.send_message(self.user.message.chat.id, 'После запуска бота вашим другом вы получите уведомление!\n'
+														'Ссылка для приглашения: https://t.me/fricibot?start='+self.user.ref_code)
 
 class ShopPage():
 	def __init__(self, user):
