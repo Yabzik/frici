@@ -6,6 +6,8 @@ from utils import genRef
 
 from conf import db_conf
 
+import datetime
+
 def add_user(user_id, ref_id=None):
 	with closing(pymysql.connect(**db_conf)) as conn:
 		with conn.cursor() as cursor:
@@ -144,4 +146,31 @@ def del_sale_app(id):
 		with conn.cursor() as cursor:
 			sql = 'DELETE FROM goods WHERE id = %s;'
 			cursor.execute(sql, id)
+			conn.commit()
+
+def get_selling_products():
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'SELECT * FROM goods WHERE status = "sale"'
+			cursor.execute(sql)
+			try:
+				return cursor.fetchall()
+			except TypeError:
+				return None
+
+def get_product(id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'SELECT * FROM goods WHERE id = %s'
+			cursor.execute(sql, id)
+			try:
+				return cursor.fetchone()
+			except TypeError:
+				return None
+
+def buy_product(product_id, buyer_id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'UPDATE goods SET buyer = %s, status = %s, bought = %s WHERE id = %s'
+			cursor.execute(sql, (buyer_id, 'sold', datetime.datetime.now(), product_id))
 			conn.commit()

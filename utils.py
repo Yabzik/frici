@@ -55,3 +55,13 @@ def checkCommon(message):
 def genRef():
 	import random, string
 	return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+def convertInt(inp, reverse=False):
+	orig_hex = '0123456789abcdef'
+	custom_hex = 'qdvbhukmrzilycna'
+	trns = str.maketrans(orig_hex, custom_hex)
+	rev_trns = str.maketrans(custom_hex, orig_hex)
+	if reverse:
+		return int(inp.translate(rev_trns), 16)
+	else:
+		return hex(inp)[2:].translate(trns)

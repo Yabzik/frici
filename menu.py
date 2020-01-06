@@ -1,6 +1,7 @@
 import telebot
 import db
 import msg
+import utils
 
 from telebot import types
 from user import User
@@ -55,10 +56,14 @@ class MainPage():
 			#тут переход на другую страницу
 			self.user.setState('shop')
 
-			#обновление страницы
-			bot.reply_to(self.user.message, "Вы ушли в шоп", reply_markup = 
-			  Page(self.user).getMarkup())
-			pass
+			if db.get_selling_products():
+				text = 'Товары в продаже:'
+				for product in db.get_selling_products():
+					text += '\n\n🔹 <b>{}</b>\nЦена: {} 💎\nКупить: /buy_{}'.format(product['title'], product['price'], utils.convertInt(product['id']))
+				bot.send_message(self.user.message.chat.id, text, parse_mode='HTML', reply_markup = Page(self.user).getMarkup())
+			else:
+				bot.send_message(self.user.message.chat.id, 'К сожалению, сейчас ничего нет в продаже. Почему бы не продать что-то?', reply_markup = Page(self.user).getMarkup())
+	
 		elif button == self.sellButton:
 			#тут переход на другую страницу
 			self.user.setState('sale')
@@ -100,39 +105,84 @@ class ShopPage():
 		self.user = user
 
 		#инициализация кнопок 
-		self.beerButton = 'Пиво'
-		self.vodkaButton = 'Водка'
-		self.backButton = 'В мейн'
+		#self.beerButton = 'Пиво'
+		#self.vodkaButton = 'Водка'
+		self.backButton = 'В главное меню'
 
 		#лист текста кнопок(для проверки в хендлере)
-		self.msgList = [self.beerButton, self.vodkaButton, self.backButton]
+		self.msgList = [self.backButton]
 
 		#создание объекта для отображения кнопок
 		self.markup = types.ReplyKeyboardMarkup(row_width=2)
 
 		#закидываем кнопки в объект для отображения
-		self.markup.row(types.KeyboardButton(self.beerButton),
-				 types.KeyboardButton(self.vodkaButton))
+		#self.markup.row(types.KeyboardButton(self.beerButton),
+		#		 types.KeyboardButton(self.vodkaButton))
 		self.markup.row(types.KeyboardButton(self.backButton))
-		self.markup.row(types.KeyboardButton('suchka'))
 	
 	#что же будет делать кнопка при нажатии?????????
 	def onPressButton(self):
 		button = self.user.message.text
-
+		"""
 		if button == self.beerButton:
 			bot.reply_to(self.user.message, 'Вы купили пиво')
 		elif button == self.vodkaButton:
 			bot.reply_to(self.user.message, 'Вы купили водку')
 			pass
-		elif button == self.backButton:
+		"""
+		if button == self.backButton:
 			#тут переход на другую страницу
 			self.user.setState('main')
 			
 			#обновление страницы
 			bot.reply_to(self.user.message, "Вы ушли в мейн", reply_markup = 
 			  Page(self.user).getMarkup())
-			pass	
+	def onCommand(self):
+		command = self.user.message.text
+
+		if command.startswith('/buy_'): #отлов /buy
+			command = command[5:] # убрать префикс
+			product_id = utils.convertInt(command, reverse=True)
+			product = db.get_product(product_id)
+			if product['status'] == 'sale':
+				if self.user.balance >= product['price']:
+					markup = telebot.types.InlineKeyboardMarkup()
+					markup.add(telebot.types.InlineKeyboardButton(text='❌ Отменить', callback_data='buy_cancel'))
+					markup.add(telebot.types.InlineKeyboardButton(text='✅ Подтвердить', callback_data='buy_confirm_{}'.format(product_id)))
+					bot.send_message(self.user.message.chat.id, 'Подвердите покупку:\n\n{}\nЦена: {} 💎'.format(product['title'], product['price']),
+																reply_markup=markup)
+				else:
+					bot.send_message(self.user.message.chat.id, '⚠️ На вашем счету недостаточно средств')
+			else:
+				bot.send_message(self.user.message.chat.id, 'Упс, кто-то уже купил это!')
+	def handleButtonCallback(self, call):
+		if call.data == 'buy_cancel':
+			bot.answer_callback_query(callback_query_id=call.id)
+			bot.edit_message_text('Покупка была отменена', chat_id=call.message.chat.id, message_id=call.message.message_id)
+		elif call.data.startswith('buy_confirm_'):
+			bot.answer_callback_query(callback_query_id=call.id)
+			product_id = call.data[12:] #убрать префикс
+			product = db.get_product(product_id)
+			if product['status'] == 'sale' and product['seller'] != call.message.chat.id:
+				if self.user.balance >= product['price']:
+					db.buy_product(product_id, call.message.chat.id) # изменить товар в БД
+					db.add_balance(call.message.chat.id, product['price']*-1) # забрать бабки за товар
+					db.add_balance(product['seller'], product['price']) # отдать бабки за товар
+					bot.delete_message(call.message.chat.id, call.message.message_id)
+					photos = db.get_sale_app_photos(product_id)
+					media_group = []
+					for photo in photos:
+						media_group.append(types.InputMediaPhoto(photo['photo']))
+					bot.send_message(self.user.message.chat.id, 'Поздравляю с покупкой!\n\n'
+																'Название: {}\n'
+																'Описание: {}\n'.format(product['title'], product['description'])).wait()
+					bot.send_media_group(self.user.message.chat.id, media_group)
+				else:
+					bot.send_message(self.user.message.chat.id, '⚠️ На вашем счету недостаточно средств')
+			elif product['seller'] == call.message.chat.id:
+				bot.send_message(self.user.message.chat.id, 'Нельзя покупать свой товар!')
+			else:
+				bot.send_message(self.user.message.chat.id, 'Упс, кто-то уже купил это!')
 
 class SupportPage():
 	def __init__(self, user):
@@ -270,6 +320,8 @@ class Page():
 				self.page.Think()
 		elif self.__isButton(self.user.message):
 		    self.page.onPressButton()
+		elif self.__isCommand(self.user.message):
+			self.page.onCommand()
 			#новая проверка,  может ли страница обрабатывать что-то кроме кнопки
 		elif self.page.isExtended:
 			self.page.Think()
@@ -283,5 +335,10 @@ class Page():
 			return True
 		else:
 			return False
-	pass
+
+	def __isCommand(self, message):
+		if message.text[0] == '/':
+			return True
+		else:
+			return False
 	
