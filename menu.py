@@ -65,15 +65,24 @@ class MainPage():
 				bot.send_message(self.user.message.chat.id, 'К сожалению, сейчас ничего нет в продаже. Почему бы не продать что-то?', reply_markup = Page(self.user).getMarkup())
 	
 		elif button == self.sellButton:
-			#тут переход на другую страницу
-			self.user.setState('sale')
+			if db.check_sale_rules(self.user.id) == 1:
+				#тут переход на другую страницу
+				self.user.setState('sale')
 
-			#обновление страницы
-			bot.reply_to(self.user.message, "Вы зашли в создание товара на продажу, если Вы передумали что-либо продавать или ввели неккоректные данные, нажмите кнопку Отмена. После создания заявки на продажу, модераторы проверят её и Ваш товар станет доступен для покупки другим пользователям. Статус обработки заявки можно посмотреть где-то.", reply_markup = 
-			  Page(self.user).getMarkup()).wait()
+				#обновление страницы
+				bot.reply_to(self.user.message, "Вы зашли в создание товара на продажу, если Вы передумали что-либо продавать или ввели неккоректные данные, нажмите кнопку Отмена. После создания заявки на продажу, модераторы проверят её и Ваш товар станет доступен для покупки другим пользователям. Статус обработки заявки можно посмотреть где-то.", reply_markup = 
+				  Page(self.user).getMarkup()).wait()
 
-			bot.send_message(self.user.id, "Напишите название вашего товара")
-			pass
+				bot.send_message(self.user.id, "Напишите название вашего товара")
+			else:
+				markup = telebot.types.InlineKeyboardMarkup()
+				markup.add(telebot.types.InlineKeyboardButton(text='Принять соглашение', callback_data='sale_confirm_rules'))
+				bot.send_message(self.user.id, 'Перед созданием первого товара Вам нужно ознакомиться с правилами и советами:\n\n'
+												'- Товар должен быть размещен на территории школы таким образом, чтобы любой покупатель мог легко его забрать\n'
+												'- Сделайте хорошие фотографии с нескольких ракурсов\n'
+												'- Составьте подробное описание нахождения товара\n'
+												'- После добавления товара не забирайте его и не передавайте никому информацию о его размещении\n\n'
+												'- Ваш товар может быть незначительно изменен администрацией в процессе подтверждения', reply_markup=markup)
 		elif button == self.infoButton:
 			bot.send_message(self.user.id, 
 					'{} \n {}'.format(msg.info_text, self.user.balance))
@@ -94,6 +103,8 @@ class MainPage():
 			bot.answer_callback_query(callback_query_id=call.id)
 			bot.send_message(self.user.message.chat.id, 'После запуска бота вашим другом вы получите уведомление!\n'
 														'Ссылка для приглашения: https://t.me/fricibot?start='+self.user.ref_code)
+		elif call.data == 'sale_confirm_rules':
+			bot.answer_callback_query(callback_query_id=call.id, text='✅ Принято')
 
 class ShopPage():
 	def __init__(self, user):

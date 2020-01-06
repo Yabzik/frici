@@ -174,3 +174,17 @@ def buy_product(product_id, buyer_id):
 			sql = 'UPDATE goods SET buyer = %s, status = %s, bought = %s WHERE id = %s'
 			cursor.execute(sql, (buyer_id, 'sold', datetime.datetime.now(), product_id))
 			conn.commit()
+
+def check_sale_rules(user_id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'SELECT sale_rules FROM users WHERE user_id = %s'
+			cursor.execute(sql, user_id)
+			return cursor.fetchone()['sale_rules']
+
+def set_sale_rules(user_id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'UPDATE users SET sale_rules = 1 WHERE user_id = %s'
+			cursor.execute(sql, user_id)
+			conn.commit()
