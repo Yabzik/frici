@@ -134,12 +134,22 @@ def set_sale_app_status(id, status):
 			cursor.execute(sql, (status, id))
 			conn.commit()
 
-def add_sale_app_photo(id, photo):
+def add_sale_app_photo(id, photo, media_group_id):
 	with closing(pymysql.connect(**db_conf)) as conn:
 		with conn.cursor() as cursor:
-			sql = 'INSERT INTO photos (sale_id, photo) VALUES (%s, %s)'
-			cursor.execute(sql, (id, photo))
+			sql = 'INSERT INTO photos (sale_id, photo, media_group_id) VALUES (%s, %s, %s)'
+			cursor.execute(sql, (id, photo, media_group_id))
 			conn.commit()
+
+def check_photo_media_group(media_group_id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'SELECT * FROM photos WHERE media_group_id = %s'
+			cursor.execute(sql, media_group_id)
+			if cursor.rowcount == 0:
+				return False
+			else:
+				return True
 
 def del_sale_app(id):
 	with closing(pymysql.connect(**db_conf)) as conn:

@@ -35,8 +35,8 @@ class SaleApp():
 		db.set_sale_app_status(self.id, status)
 		self.status = status
 
-	def addPhoto(self, photo):
-		db.add_sale_app_photo(self.id, photo)
+	def addPhoto(self, photo, md_group):
+		db.add_sale_app_photo(self.id, photo, md_group)
 		#self.photos.append(photo)
 
 	def delete(self):

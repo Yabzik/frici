@@ -286,8 +286,15 @@ class SalePage():
 			fileID = self.user.message.photo[-1].file_id
 			file = bot.get_file(fileID).wait()
 			pic = bot.download_file(file.file_path).wait()
-			self.saleApp.addPhoto(pic)
-			bot.send_message(self.user.id, "Напишите цену вашего товара")
+			if self.user.message.media_group_id:
+				if db.check_photo_media_group(self.user.message.media_group_id):
+					self.saleApp.addPhoto(pic, self.user.message.media_group_id)
+				else:
+					self.saleApp.addPhoto(pic, self.user.message.media_group_id)
+					bot.send_message(self.user.id, "Напишите цену вашего товара")
+			else:
+				self.saleApp.addPhoto(pic, 0)
+				bot.send_message(self.user.id, "Напишите цену вашего товара")
 		elif not self.saleApp.price:
 			self.saleApp.setPrice(self.user.message.text)
 			
