@@ -7,7 +7,7 @@ from telebot import types
 from user import User
 from saleApplication import SaleApp
 
-bot = telebot.AsyncTeleBot("605894746:AAHprnzygPIMD0yBCeecyC0kYehYKBWoOQ0")
+bot = telebot.AsyncTeleBot("605894746:AAG0WlMjuXoFtKjMOhdhRDkrA-0Ca1uC06I")
 
 #создание страницы меню
 class MainPage():
@@ -46,8 +46,9 @@ class MainPage():
 
 		if button == self.profileButton:
 			markup = telebot.types.InlineKeyboardMarkup()
-			button = telebot.types.InlineKeyboardButton(text='Пригласить друга', callback_data='invite_message')
-			markup.add(button)
+			markup.add(telebot.types.InlineKeyboardButton(text='🛒 Мои покупки', callback_data='my_purchases'))
+			markup.add(telebot.types.InlineKeyboardButton(text='💰 Мои продажи', callback_data='my_sales'))
+			markup.add(telebot.types.InlineKeyboardButton(text='🤝 Пригласить друга', callback_data='invite_message'))
 			bot.send_message(self.user.message.chat.id, '💎 Баланс: {}\n'
 														'🛒 Покупок: {}\n'
 														'💰 Продаж: {}'.format(self.user.balance, db.get_purchases(self.user.id), db.get_sells(self.user.id)),
@@ -99,6 +100,23 @@ class MainPage():
 			markup.add(telebot.types.InlineKeyboardButton(text='Получить ссылку для приглашения', callback_data='invite_get_link'))
 			bot.send_message(self.user.message.chat.id, 'Вы можете пригласить друга запустить бота. При этом и Вы и приглашенный друг получите +25 к балансу.',
 														reply_markup=markup)
+		elif call.data == 'my_purchases':
+			bot.answer_callback_query(callback_query_id=call.id)
+			if db.get_user_bought_products(self.user.message.chat.id):
+				text = 'Мои покупки:'
+				for product in db.get_user_bought_products(self.user.message.chat.id):
+					text += '\n\n- {}\nЦена: {} 💎'.format(product['title'], product['price'])
+				bot.send_message(self.user.message.chat.id, text)
+			else:
+				bot.send_message(self.user.message.chat.id, 'Вы еще ничего не купили. Почему бы не сделать это прямо сейчас?')
+		elif call.data == 'my_sales':
+			if db.get_user_sale_products(self.user.message.chat.id):
+				text = 'Мои продажи:'
+				for product in db.get_user_sale_products(self.user.message.chat.id):
+					text += '\n\n- {}\nЦена: {} 💎\nСтатус: {}'.format(product['title'], product['price'], utils.status[product['status']])
+				bot.send_message(self.user.message.chat.id, text)
+			else:
+				bot.send_message(self.user.message.chat.id, 'У вас нет товаров, размещенных для продажи. Может стоит продать что-то?')
 		elif call.data == 'invite_get_link':
 			bot.answer_callback_query(callback_query_id=call.id)
 			bot.send_message(self.user.message.chat.id, 'После запуска бота вашим другом вы получите уведомление!\n'
@@ -338,7 +356,7 @@ class Page():
 			if self.page_name == 'sale':
 				self.page.Think()
 		elif self.__isButton(self.user.message):
-		    self.page.onPressButton()
+			self.page.onPressButton()
 		elif self.__isCommand(self.user.message):
 			self.page.onCommand()
 			#новая проверка,  может ли страница обрабатывать что-то кроме кнопки

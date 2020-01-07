@@ -65,3 +65,10 @@ def convertInt(inp, reverse=False):
 		return int(inp.translate(rev_trns), 16)
 	else:
 		return hex(inp)[2:].translate(trns)
+
+status = {
+	'checking': 'проверяется',
+	'sale': 'в продаже',
+	'sold': 'продано',
+	'declined': 'отклонено'
+}

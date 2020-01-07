@@ -168,6 +168,26 @@ def get_selling_products():
 			except TypeError:
 				return None
 
+def get_user_bought_products(user_id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'SELECT * FROM goods WHERE buyer = %s'
+			cursor.execute(sql, user_id)
+			try:
+				return cursor.fetchall()
+			except TypeError:
+				return None
+
+def get_user_sale_products(user_id):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'SELECT * FROM goods WHERE seller = %s'
+			cursor.execute(sql, user_id)
+			try:
+				return cursor.fetchall()
+			except TypeError:
+				return None
+
 def get_product(id):
 	with closing(pymysql.connect(**db_conf)) as conn:
 		with conn.cursor() as cursor:

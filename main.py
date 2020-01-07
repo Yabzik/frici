@@ -24,7 +24,7 @@ logger.addHandler(ch)
 logger.addHandler(file_handler)
 
 
-bot = telebot.AsyncTeleBot("605894746:AAHprnzygPIMD0yBCeecyC0kYehYKBWoOQ0")
+bot = telebot.AsyncTeleBot("605894746:AAG0WlMjuXoFtKjMOhdhRDkrA-0Ca1uC06I")
 # ---INIT---
 
 
@@ -62,10 +62,10 @@ def handle_common(message):
 @utils.safe
 def query_handler(call):
 	# отлов вызовов с кнопок
-    user = User(call.message)
-    curPage = Page(user)
+	user = User(call.message)
+	curPage = Page(user)
 
-    curPage.handleButtonCallback(call)
+	curPage.handleButtonCallback(call)
 	#if call.data == 'add':
 	#	bot.answer_callback_query(callback_query_id=call.id, text='Hello world')
 
