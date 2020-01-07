@@ -104,8 +104,9 @@ class MainPage():
 			bot.send_message(self.user.message.chat.id, 'После запуска бота вашим другом вы получите уведомление!\n'
 														'Ссылка для приглашения: https://t.me/fricibot?start='+self.user.ref_code)
 		elif call.data == 'sale_confirm_rules':
-			bot.answer_callback_query(callback_query_id=call.id, text='✅ Принято')
-
+			db.set_sale_rules(self.user.message.chat.id)
+			bot.delete_message(call.message.chat.id, call.message.message_id)
+			bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text='✅ Вы приняли соглашение. Теперь можно продать что-то!').wait()
 class ShopPage():
 	def __init__(self, user):
 		#колхозная проверка на наличии альтернативной обработки
