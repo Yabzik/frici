@@ -14,7 +14,7 @@ class MainPage():
 	def __init__(self, user):
 		#колхозная проверка на наличии альтернативной обработки
 		#сообщения у страницы(временно)
-		self.isExtended = False	
+		self.isExtended = True	
 	
 		#инициализируем пользователя
 		self.user = user
@@ -49,6 +49,7 @@ class MainPage():
 			markup.add(telebot.types.InlineKeyboardButton(text='🛒 Мои покупки', callback_data='my_purchases'))
 			markup.add(telebot.types.InlineKeyboardButton(text='💰 Мои продажи', callback_data='my_sales'))
 			markup.add(telebot.types.InlineKeyboardButton(text='🤝 Пригласить друга', callback_data='invite_message'))
+			markup.add(telebot.types.InlineKeyboardButton(text='🏷 Ввести код купона', callback_data='enter_coupon_code'))
 			bot.send_message(self.user.message.chat.id, '💎 Баланс: {}\n'
 														'🛒 Покупок: {}\n'
 														'💰 Продаж: {}'.format(self.user.balance, db.get_purchases(self.user.id), db.get_sells(self.user.id)),
@@ -125,6 +126,20 @@ class MainPage():
 			db.set_sale_rules(self.user.message.chat.id)
 			bot.delete_message(call.message.chat.id, call.message.message_id)
 			bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text='✅ Вы приняли соглашение. Теперь можно продать что-то!').wait()
+		elif call.data == 'enter_coupon_code':
+			bot.answer_callback_query(callback_query_id=call.id)
+			bot.send_message(self.user.message.chat.id, 'Введите код купона:', reply_markup=types.ForceReply())
+	def Think(self):
+		if self.user.message.reply_to_message.text == 'Введите код купона:':
+			result = db.activate_coupon(self.user.message.chat.id, self.user.message.text)
+			text = ''
+			if result == None:
+				text = 'Такого купона нет!'
+			elif result == False:
+				text = 'Упс, кто-то уже активировал этот купон'
+			elif result == True:
+				text = 'Купон был успешно активирован'
+			bot.reply_to(self.user.message, text, reply_markup = Page(self.user).getMarkup())
 class ShopPage():
 	def __init__(self, user):
 		#колхозная проверка на наличии альтернативной обработки

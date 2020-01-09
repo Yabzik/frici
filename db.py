@@ -218,3 +218,23 @@ def set_sale_rules(user_id):
 			sql = 'UPDATE users SET sale_rules = 1 WHERE user_id = %s'
 			cursor.execute(sql, user_id)
 			conn.commit()
+
+def activate_coupon(user_id, coupon):
+	with closing(pymysql.connect(**db_conf)) as conn:
+		with conn.cursor() as cursor:
+			sql = 'SELECT * FROM coupons WHERE code = %s'
+			cursor.execute(sql, coupon)
+			try:
+				res = cursor.fetchone()
+			except TypeError:
+				return None
+			if not res:
+				return None
+			if res['remain_uses'] == 0:
+				return False
+			else:
+				upsql = 'UPDATE coupons SET remain_uses = remain_uses - 1, activated_by = %s WHERE code = %s'
+				cursor.execute(upsql, (user_id, coupon))
+				conn.commit()
+				add_balance(user_id, res['value'])
+				return True
