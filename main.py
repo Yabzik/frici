@@ -23,6 +23,7 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 logger.addHandler(file_handler)
 
+main_logger = logging.getLogger('Main')
 
 bot = telebot.AsyncTeleBot("605894746:AAG0WlMjuXoFtKjMOhdhRDkrA-0Ca1uC06I")
 # ---INIT---
@@ -32,16 +33,20 @@ bot = telebot.AsyncTeleBot("605894746:AAG0WlMjuXoFtKjMOhdhRDkrA-0Ca1uC06I")
 @bot.message_handler(commands=['start', 'help'])
 @utils.safe
 def send_welcome(message):
+	main_logger.info('{} - /start'.format(message.chat.id))
 	if not db.get_user(message.chat.id): # if new user
 		if len(message.text.split()) > 1: # if referal in /start
 			refid = db.get_id_by_ref(message.text.split()[1])
 			if refid: # if refid is not none
+				main_logger.info('{} - /start - Новый пользователь, реф - {}'.format(message.chat.id, refid))
 				bot.send_message(refid, '🏅 Кто-то запустил бота по вашей ссылке! Вы получили +25 к балансу')
 				db.add_user(message.chat.id, ref_id=refid)
 				db.add_balance(refid, 25)
 			else:
+				main_logger.info('{} - /start - Новый пользователь, реф невалидный - {}'.format(message.chat.id, message.text.split()[1]))
 				db.add_user(message.chat.id)
 		else:
+			main_logger.info('{} - /start - новый пользователь, без рефа'.format(message.chat.id))
 			db.add_user(message.chat.id)
 	bot.reply_to(message, msg.hello, reply_markup = 
 			  Page(User(message)).getMarkup())

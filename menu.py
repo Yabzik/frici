@@ -7,7 +7,23 @@ from telebot import types
 from user import User
 from saleApplication import SaleApp
 
+import emoji
+
 bot = telebot.AsyncTeleBot("605894746:AAG0WlMjuXoFtKjMOhdhRDkrA-0Ca1uC06I")
+
+# ------ ЛОГИ  ------
+import logging
+logger = logging.getLogger('Main')
+logger.setLevel(logging.DEBUG)
+file_handler = logging.FileHandler('actions.log')
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+logger.addHandler(file_handler)
+# ------ ЛОГИ  ------
 
 #создание страницы меню
 class MainPage():
@@ -43,7 +59,7 @@ class MainPage():
 	#что же будет делать кнопка при нажатии?????????
 	def onPressButton(self):
 		button = self.user.message.text
-
+		logger.info('{} - нажата кнопка {}'.format(self.user.message.chat.id, emoji.demojize(button)))
 		if button == self.profileButton:
 			markup = telebot.types.InlineKeyboardMarkup()
 			markup.add(telebot.types.InlineKeyboardButton(text='🛒 Мои покупки', callback_data='my_purchases'))
@@ -95,6 +111,7 @@ class MainPage():
 			  Page(self.user).getMarkup())
 
 	def handleButtonCallback(self, call):
+		logger.info('{} - главная страница, колбэк кнопки {}'.format(message.chat.id, call.data))
 		if call.data == 'invite_message':
 			bot.answer_callback_query(callback_query_id=call.id)
 			markup = telebot.types.InlineKeyboardMarkup()
@@ -130,6 +147,7 @@ class MainPage():
 			bot.answer_callback_query(callback_query_id=call.id)
 			bot.send_message(self.user.message.chat.id, 'Введите код купона:', reply_markup=types.ForceReply())
 	def Think(self):
+		logger.info('{} - главная страница, думать - {}'.format(message.chat.id, self.user.message.text))
 		if self.user.message.reply_to_message.text == 'Введите код купона:':
 			result = db.activate_coupon(self.user.message.chat.id, self.user.message.text)
 			text = ''
@@ -393,4 +411,3 @@ class Page():
 			return True
 		else:
 			return False
-	
