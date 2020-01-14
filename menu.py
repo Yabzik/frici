@@ -53,7 +53,7 @@ class MainPage():
 		self.markup.row(types.KeyboardButton(self.profileButton))
 		self.markup.row(types.KeyboardButton(self.buyButton),
 				 types.KeyboardButton(self.sellButton))
-		self.markup.row(types.KeyboardButton(self.infoButton))
+		#self.markup.row(types.KeyboardButton(self.infoButton))
 		self.markup.row(types.KeyboardButton(self.supportButton))
 	
 	#что же будет делать кнопка при нажатии?????????
