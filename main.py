@@ -5,6 +5,8 @@ import utils
 import msg
 import db
 
+import flask, time
+
 from saleApplication import SaleApp
 
 from user import User
@@ -26,9 +28,11 @@ logger.addHandler(file_handler)
 
 main_logger = logging.getLogger('Main')
 
-bot = telebot.AsyncTeleBot("605894746:AAG0WlMjuXoFtKjMOhdhRDkrA-0Ca1uC06I")
-# ---INIT---
+API_TOKEN = '605894746:AAG0WlMjuXoFtKjMOhdhRDkrA-0Ca1uC06I'
 
+bot = telebot.AsyncTeleBot(API_TOKEN)
+
+# ---INIT---
 
 # ---HANDLERS---
 @bot.message_handler(commands=['start', 'help'])
@@ -77,8 +81,47 @@ def query_handler(call):
 
 # ---HANDLERS---
 
+# ---WEBHOOK---
+
+# ЗАКОММЕНТИТЬ ПРИ РАЗРАБОТКЕ И РАСКОМЕНТИТЬ ПОЛЛИНГ
+
+WEBHOOK_HOST = 'yabzik.online'
+WEBHOOK_LISTEN = '0.0.0.0' 
+
+WEBHOOK_URL_BASE = "https://%s:%s" % (WEBHOOK_HOST, 443)
+WEBHOOK_URL_PATH = "/%s/" % (API_TOKEN)
+
+app = flask.Flask(__name__)
+
+@app.route('/', methods=['GET', 'HEAD'])
+def index():
+    return ''
+
+@app.route(WEBHOOK_URL_PATH, methods=['POST'])
+@utils.safe
+def webhook():
+    if flask.request.headers.get('content-type') == 'application/json':
+        json_string = flask.request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return ''
+    else:
+        flask.abort(403)
+
+bot.remove_webhook()
+
+time.sleep(1)
+
+bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH)
+
+app.run(host=WEBHOOK_LISTEN,
+        port=9850,
+        debug=False)
+
+# ---WEBHOOK---
 
 @utils.safe
 def main():
-	bot.polling()
+	#bot.polling()
+	pass
 main()
