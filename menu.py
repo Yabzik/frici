@@ -88,7 +88,7 @@ class MainPage():
 				self.user.setState('sale')
 
 				#обновление страницы
-				bot.reply_to(self.user.message, "Вы зашли в создание товара на продажу, если Вы передумали что-либо продавать или ввели неккоректные данные, нажмите кнопку Отмена. После создания заявки на продажу, модераторы проверят её и Ваш товар станет доступен для покупки другим пользователям. Статус обработки заявки можно посмотреть где-то.", reply_markup = 
+				bot.reply_to(self.user.message, "Вы начали создание товара на продажу, если Вы передумали что-либо продавать или ввели неккоректные данные, нажмите кнопку Отмена. После создания заявки на продажу, модераторы проверят её и Ваш товар станет доступен для покупки другим пользователям. Статус обработки заявки можно посмотреть в личном кабинете.", reply_markup = 
 				  Page(self.user).getMarkup()).wait()
 
 				bot.send_message(self.user.id, "Напишите название вашего товара")
@@ -192,7 +192,7 @@ class ShopPage():
 			self.user.setState('main')
 			
 			#обновление страницы
-			bot.reply_to(self.user.message, "Вы ушли в мейн", reply_markup = 
+			bot.reply_to(self.user.message, "Вы вернулись в главное меню", reply_markup = 
 			  Page(self.user).getMarkup())
 	def onCommand(self):
 		command = self.user.message.text
@@ -315,7 +315,7 @@ class SalePage():
 			self.user.setState('main')
 
 			#обновление страницы
-			bot.reply_to(self.user.message, "Вы ушли в главное меню", reply_markup = 
+			bot.reply_to(self.user.message, "Вы вернулись в главное меню", reply_markup = 
 			  Page(self.user).getMarkup())
 			pass
 
