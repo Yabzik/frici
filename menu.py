@@ -111,7 +111,7 @@ class MainPage():
 			  Page(self.user).getMarkup())
 
 	def handleButtonCallback(self, call):
-		logger.info('{} - главная страница, колбэк кнопки {}'.format(message.chat.id, call.data))
+		logger.info('{} - главная страница, колбэк кнопки {}'.format(self.user.message.chat.id, call.data))
 		if call.data == 'invite_message':
 			bot.answer_callback_query(callback_query_id=call.id)
 			markup = telebot.types.InlineKeyboardMarkup()
@@ -147,7 +147,7 @@ class MainPage():
 			bot.answer_callback_query(callback_query_id=call.id)
 			bot.send_message(self.user.message.chat.id, 'Введите код купона:', reply_markup=types.ForceReply())
 	def Think(self):
-		logger.info('{} - главная страница, думать - {}'.format(message.chat.id, self.user.message.text))
+		logger.info('{} - главная страница, думать - {}'.format(self.user.message.chat.id, self.user.message.text))
 		if self.user.message.reply_to_message.text == 'Введите код купона:':
 			result = db.activate_coupon(self.user.message.chat.id, self.user.message.text)
 			text = ''
@@ -186,13 +186,7 @@ class ShopPage():
 	#что же будет делать кнопка при нажатии?????????
 	def onPressButton(self):
 		button = self.user.message.text
-		"""
-		if button == self.beerButton:
-			bot.reply_to(self.user.message, 'Вы купили пиво')
-		elif button == self.vodkaButton:
-			bot.reply_to(self.user.message, 'Вы купили водку')
-			pass
-		"""
+		logger.info('{} - в магазине нажата кнопка {}'.format(self.user.message.chat.id, emoji.demojize(button)))
 		if button == self.backButton:
 			#тут переход на другую страницу
 			self.user.setState('main')
@@ -202,7 +196,7 @@ class ShopPage():
 			  Page(self.user).getMarkup())
 	def onCommand(self):
 		command = self.user.message.text
-
+		logger.info('{} - в магазине введена команда {}'.format(self.user.message.chat.id, command))
 		if command.startswith('/buy_'): #отлов /buy
 			command = command[5:] # убрать префикс
 			product_id = utils.convertInt(command, reverse=True)
@@ -219,6 +213,7 @@ class ShopPage():
 			else:
 				bot.send_message(self.user.message.chat.id, 'Упс, кто-то уже купил это!')
 	def handleButtonCallback(self, call):
+		logger.info('{} - магазин, колбэк кнопки {}'.format(self.user.message.chat.id, call.data))
 		if call.data == 'buy_cancel':
 			bot.answer_callback_query(callback_query_id=call.id)
 			bot.edit_message_text('Покупка была отменена', chat_id=call.message.chat.id, message_id=call.message.message_id)
@@ -272,7 +267,7 @@ class SupportPage():
 	#что же будет делать кнопка при нажатии?????????
 	def onPressButton(self):
 		button = self.user.message.text
-
+		logger.info('{} - саппорт, нажата кнопка {}'.format(self.user.message.chat.id, emoji.demojize(button)))
 		if button == self.completeButton:
 			self.user.setState('main') #переход на другую станицу
 
@@ -280,6 +275,7 @@ class SupportPage():
 			  Page(self.user).getMarkup())
 
 	def Think(self):
+		logger.info('{} - сообщение в саппорт - {}'.format(self.user.message.chat.id, self.user.message.text))
 		db.open_support(self.user.id)
 		db.send_to_support(self.user.id, self.user.message.text)
 
@@ -310,7 +306,7 @@ class SalePage():
 	#что же будет делать кнопка при нажатии?????????
 	def onPressButton(self):
 		button = self.user.message.text
-	
+		logger.info('{} - продажа, нажата кнопка {}'.format(self.user.message.chat.id, emoji.demojize(button)))
 		if button == self.cancel:
 			#удаляем заявку
 			self.saleApp.delete()
@@ -324,16 +320,18 @@ class SalePage():
 			pass
 
 	def Think(self):
-		
 		if self.saleApp.title == 'None':
+			logger.info('{} - продажа, ввод названия - {}'.format(self.user.message.chat.id, emoji.demojize(self.user.message.text)))
 			self.saleApp.setTitle(self.user.message.text)
 
 			#это сообщение оповещает юзера про то что следующая обработка - это елиф ниже данного коммента
 			bot.send_message(self.user.id, "Напишите описание к вашему товару")
 		elif self.saleApp.description == 'None':
+			logger.info('{} - продажа, ввод описания - {}'.format(self.user.message.chat.id, emoji.demojize(self.user.message.text)))
 			self.saleApp.setDesc(self.user.message.text)
 			bot.send_message(self.user.id, "Отправьте фотографии товара (все одним сообщением)")
 		elif not self.saleApp.photos or self.user.message.content_type == 'photo':
+			logger.info('{} - продажа, приемка картинок'.format(self.user.message.chat.id))
 			fileID = self.user.message.photo[-1].file_id
 			file = bot.get_file(fileID).wait()
 			pic = bot.download_file(file.file_path).wait()
@@ -347,6 +345,7 @@ class SalePage():
 				self.saleApp.addPhoto(pic, 0)
 				bot.send_message(self.user.id, "Напишите цену вашего товара")
 		elif not self.saleApp.price:
+			logger.info('{} - продажа, ввод цены - {}'.format(self.user.message.chat.id, emoji.demojize(self.user.message.text)))
 			self.saleApp.setPrice(self.user.message.text)
 			
 			#смена статуса на "проверяется"
