@@ -48,8 +48,13 @@ def send_welcome(message):
 				db.add_user(message.chat.id, ref_id=refid)
 				db.add_balance(refid, 25)
 			else:
-				main_logger.info('{} - /start - Новый пользователь, реф невалидный - {}'.format(message.chat.id, message.text.split()[1]))
-				db.add_user(message.chat.id)
+				ref_code = message.text.split()[1]
+				if ref_code.isdigit() and int(ref_code) < 100: #utm метка
+					main_logger.info('{} - /start - Новый пользователь, UTM - {}'.format(message.chat.id, ref_code))
+					db.add_user(message.chat.id, ref_id=(int(ref_code)*-1))
+				else:
+					main_logger.info('{} - /start - Новый пользователь, реф невалидный - {}'.format(message.chat.id, ref_code))
+					db.add_user(message.chat.id)
 		else:
 			main_logger.info('{} - /start - новый пользователь, без рефа'.format(message.chat.id))
 			db.add_user(message.chat.id)
