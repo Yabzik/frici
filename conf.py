@@ -1,6 +1,6 @@
 from pymysql.cursors import DictCursor
 db_conf = {
-	'host': '81.22.132.118',
+	'host': 'yabzik.online',
 	'user': 'frici',
 	'password': 'uDpjY$?3Pzq&%$m',
 	'db': 'frici',
