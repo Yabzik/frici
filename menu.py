@@ -66,7 +66,7 @@ class MainPage():
 			markup.add(telebot.types.InlineKeyboardButton(text='💰 Мои продажи', callback_data='my_sales'))
 			markup.add(telebot.types.InlineKeyboardButton(text='🤝 Пригласить друга', callback_data='invite_message'))
 			markup.add(telebot.types.InlineKeyboardButton(text='🏷 Ввести код купона', callback_data='enter_coupon_code'))
-			bot.send_message(self.user.message.chat.id, '💎 Баланс: {}\n'
+			bot.send_message(self.user.message.chat.id, '₴ Баланс: {}\n'
 														'🛒 Покупок: {}\n'
 														'💰 Продаж: {}'.format(self.user.balance, db.get_purchases(self.user.id), db.get_sells(self.user.id)),
 														reply_markup=markup)
@@ -75,10 +75,14 @@ class MainPage():
 			self.user.setState('shop')
 
 			if db.get_selling_products():
-				text = 'Товары в продаже:'
+				bot.send_message(self.user.message.chat.id, 'Товары в продаже:', parse_mode='HTML', reply_markup = Page(self.user).getMarkup())
 				for product in db.get_selling_products():
-					text += '\n\n🔹 <b>{}</b>\nЦена: {} 💎\nКупить: /buy_{}'.format(product['title'], product['price'], utils.convertInt(product['id']))
-				bot.send_message(self.user.message.chat.id, text, parse_mode='HTML', reply_markup = Page(self.user).getMarkup())
+					bot.send_message(self.user.message.chat.id, '\n\n🔹 <b>{}</b>\nЦена: {} ₴\nКупить: /buy_{}'.format(product['title'], product['price'], utils.convertInt(product['id'])), parse_mode='HTML', reply_markup = Page(self.user).getMarkup())
+					photos = db.get_sale_app_photos(product.id)
+					media_group = []
+					for photo in photos:
+						media_group.append(types.InputMediaPhoto(photo['photo']))
+					bot.send_media_group(self.user.message.chat.id, media_group)
 			else:
 				bot.send_message(self.user.message.chat.id, 'К сожалению, сейчас ничего нет в продаже. Почему бы не продать что-то?', reply_markup = Page(self.user).getMarkup())
 	
@@ -96,11 +100,8 @@ class MainPage():
 				markup = telebot.types.InlineKeyboardMarkup()
 				markup.add(telebot.types.InlineKeyboardButton(text='Принять соглашение', callback_data='sale_confirm_rules'))
 				bot.send_message(self.user.id, 'Перед созданием первого товара Вам нужно ознакомиться с правилами и советами:\n\n'
-												'- Товар должен быть размещен на территории школы таким образом, чтобы любой покупатель мог легко его забрать\n'
 												'- Сделайте хорошие фотографии с нескольких ракурсов\n'
-												'- Составьте подробное описание нахождения товара\n'
-												'- После добавления товара не забирайте его и не передавайте никому информацию о его размещении\n\n'
-												'- Ваш товар может быть незначительно изменен администрацией в процессе подтверждения', reply_markup=markup)
+												'- Составьте подробное описание товара\n', reply_markup=markup)
 		elif button == self.infoButton:
 			bot.send_message(self.user.id, 
 					'{} \n {}'.format(msg.info_text, self.user.balance))
@@ -116,14 +117,14 @@ class MainPage():
 			bot.answer_callback_query(callback_query_id=call.id)
 			markup = telebot.types.InlineKeyboardMarkup()
 			markup.add(telebot.types.InlineKeyboardButton(text='Получить ссылку для приглашения', callback_data='invite_get_link'))
-			bot.send_message(self.user.message.chat.id, 'Вы можете пригласить друга запустить бота. При этом и Вы и приглашенный друг получите +25 к балансу.',
+			bot.send_message(self.user.message.chat.id, 'Вы можете пригласить друга запустить бота. При этом и Вы и приглашенный друг получите +25 к балансу, которые будут засчитаны как скидка.',
 														reply_markup=markup)
 		elif call.data == 'my_purchases':
 			bot.answer_callback_query(callback_query_id=call.id)
 			if db.get_user_bought_products(self.user.message.chat.id):
 				text = 'Мои покупки:'
 				for product in db.get_user_bought_products(self.user.message.chat.id):
-					text += '\n\n- {}\nЦена: {} 💎'.format(product['title'], product['price'])
+					text += '\n\n- {}\nЦена: {} ₴'.format(product['title'], product['price'])
 				bot.send_message(self.user.message.chat.id, text)
 			else:
 				bot.send_message(self.user.message.chat.id, 'Вы еще ничего не купили. Почему бы не сделать это прямо сейчас?')
@@ -131,7 +132,7 @@ class MainPage():
 			if db.get_user_sale_products(self.user.message.chat.id):
 				text = 'Мои продажи:'
 				for product in db.get_user_sale_products(self.user.message.chat.id):
-					text += '\n\n- {}\nЦена: {} 💎\nСтатус: {}'.format(product['title'], product['price'], utils.status[product['status']])
+					text += '\n\n- {}\nЦена: {} ₴\nСтатус: {}'.format(product['title'], product['price'], utils.status[product['status']])
 				bot.send_message(self.user.message.chat.id, text)
 			else:
 				bot.send_message(self.user.message.chat.id, 'У вас нет товаров, размещенных для продажи. Может стоит продать что-то?')
@@ -206,7 +207,7 @@ class ShopPage():
 					markup = telebot.types.InlineKeyboardMarkup()
 					markup.add(telebot.types.InlineKeyboardButton(text='❌ Отменить', callback_data='buy_cancel'))
 					markup.add(telebot.types.InlineKeyboardButton(text='✅ Подтвердить', callback_data='buy_confirm_{}'.format(product_id)))
-					bot.send_message(self.user.message.chat.id, 'Подвердите покупку:\n\n{}\nЦена: {} 💎'.format(product['title'], product['price']),
+					bot.send_message(self.user.message.chat.id, 'Подвердите покупку:\n\n{}\nЦена: {} ₴'.format(product['title'], product['price']),
 																reply_markup=markup)
 				else:
 					bot.send_message(self.user.message.chat.id, '⚠️ На вашем счету недостаточно средств')
