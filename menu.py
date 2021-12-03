@@ -77,11 +77,11 @@ class MainPage():
 			if db.get_selling_products():
 				bot.send_message(self.user.message.chat.id, 'Товары в продаже:', parse_mode='HTML', reply_markup = Page(self.user).getMarkup())
 				for product in db.get_selling_products():
-					bot.send_message(self.user.message.chat.id, '\n\n🔹 <b>{}</b>\nЦена: {} ₴\nКупить: /buy_{}'.format(product['title'], product['price'], utils.convertInt(product['id'])), parse_mode='HTML', reply_markup = Page(self.user).getMarkup())
+					text = '\n\n🔹 <b>{}</b>\nЦена: {} ₴\nКупить: /buy_{}'.format(product['title'], product['price'], utils.convertInt(product['id']))
 					photos = db.get_sale_app_photos(product['id'])
 					media_group = []
-					for photo in photos:
-						media_group.append(types.InputMediaPhoto(photo['photo']))
+					for num in range(len(photos)):
+						media_group.append(types.InputMediaPhoto(photos[num]['photo'],  caption = text if num == 0 else ''))
 					bot.send_media_group(self.user.message.chat.id, media_group)
 			else:
 				bot.send_message(self.user.message.chat.id, 'К сожалению, сейчас ничего нет в продаже. Почему бы не продать что-то?', reply_markup = Page(self.user).getMarkup())
