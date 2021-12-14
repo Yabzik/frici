@@ -77,7 +77,7 @@ class MainPage():
 			if db.get_selling_products():
 				bot.send_message(self.user.message.chat.id, 'Товары в продаже:', parse_mode='HTML', reply_markup = Page(self.user).getMarkup())
 				for product in db.get_selling_products():
-					text = '\n\n🔹 <b>{}</b>\nЦена: {} ₴\nКупить: /buy_{}'.format(product['title'], product['price'], utils.convertInt(product['id']))
+					text = '\n\n🔹 {}\nЦена: {} ₴\nКупить: /buy_{}'.format(product['title'], product['price'], utils.convertInt(product['id']))
 					photos = db.get_sale_app_photos(product['id'])
 					media_group = []
 					for num in range(len(photos)):
